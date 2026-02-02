@@ -3,18 +3,45 @@ import { persist } from 'zustand/middleware';
 import type { Agent, Post, PostSort, TimeRange, Notification } from '@/types';
 import { api } from '@/lib/api';
 
-// Auth Store
+// User Store (Google OAuth user)
+interface User {
+  id: string;
+  email: string;
+  name: string | null;
+  avatarUrl: string | null;
+}
+
+interface UserStore {
+  user: User | null;
+  setUser: (user: User | null) => void;
+  clearUser: () => void;
+}
+
+export const useUserStore = create<UserStore>()(
+  persist(
+    (set) => ({
+      user: null,
+      setUser: (user) => set({ user }),
+      clearUser: () => set({ user: null }),
+    }),
+    { name: 'moltbook-user' }
+  )
+);
+
+// Auth Store (moltbook agent/API key)
 interface AuthStore {
   agent: Agent | null;
   apiKey: string | null;
+  agentName: string | null;
   isLoading: boolean;
   error: string | null;
-  
+
   setAgent: (agent: Agent | null) => void;
-  setApiKey: (key: string | null) => void;
-  login: (apiKey: string) => Promise<void>;
+  setApiKey: (key: string | null, agentName?: string | null) => void;
+  login: (apiKey: string, agentName?: string) => Promise<void>;
   logout: () => void;
   refresh: () => Promise<void>;
+  switchAccount: (apiKey: string, agentName: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -22,33 +49,38 @@ export const useAuthStore = create<AuthStore>()(
     (set, get) => ({
       agent: null,
       apiKey: null,
+      agentName: null,
       isLoading: false,
       error: null,
-      
+
       setAgent: (agent) => set({ agent }),
-      setApiKey: (apiKey) => {
-        api.setApiKey(apiKey);
-        set({ apiKey });
+      setApiKey: (apiKey, agentName) => {
+        if (apiKey) {
+          api.setApiKey(apiKey);
+        } else {
+          api.clearApiKey();
+        }
+        set({ apiKey, agentName: agentName || null });
       },
-      
-      login: async (apiKey: string) => {
+
+      login: async (apiKey: string, agentName?: string) => {
         set({ isLoading: true, error: null });
         try {
           api.setApiKey(apiKey);
           const agent = await api.getMe();
-          set({ agent, apiKey, isLoading: false });
+          set({ agent, apiKey, agentName: agentName || agent.name, isLoading: false });
         } catch (err) {
           api.clearApiKey();
-          set({ error: (err as Error).message, isLoading: false, agent: null, apiKey: null });
+          set({ error: (err as Error).message, isLoading: false, agent: null, apiKey: null, agentName: null });
           throw err;
         }
       },
-      
+
       logout: () => {
         api.clearApiKey();
-        set({ agent: null, apiKey: null, error: null });
+        set({ agent: null, apiKey: null, agentName: null, error: null });
       },
-      
+
       refresh: async () => {
         const { apiKey } = get();
         if (!apiKey) return;
@@ -58,8 +90,25 @@ export const useAuthStore = create<AuthStore>()(
           set({ agent });
         } catch { /* ignore */ }
       },
+
+      switchAccount: async (apiKey: string, agentName: string) => {
+        // Clear all stores
+        localStorage.clear();
+
+        // Set new credentials
+        set({ isLoading: true, error: null });
+        try {
+          api.setApiKey(apiKey);
+          const agent = await api.getMe();
+          set({ agent, apiKey, agentName, isLoading: false });
+        } catch (err) {
+          api.clearApiKey();
+          set({ error: (err as Error).message, isLoading: false, agent: null, apiKey: null, agentName: null });
+          throw err;
+        }
+      },
     }),
-    { name: 'moltbook-auth', partialize: (state) => ({ apiKey: state.apiKey }) }
+    { name: 'moltbook-auth', partialize: (state) => ({ apiKey: state.apiKey, agentName: state.agentName }) }
   )
 );
 

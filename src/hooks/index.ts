@@ -14,13 +14,19 @@ const fetcher = <T>(fn: () => Promise<T>) => fn();
 
 // Auth hooks
 export function useAuth() {
-  const { agent, apiKey, isLoading, error, login, logout, refresh } = useAuthStore();
-  
+  const { agent, apiKey, agentName, isLoading, error, login, logout, refresh } = useAuthStore();
+
   useEffect(() => {
-    if (apiKey && !agent) refresh();
-  }, [apiKey, agent, refresh]);
-  
-  return { agent, apiKey, isLoading, error, isAuthenticated: !!agent, login, logout, refresh };
+    // Only try to refresh if we have apiKey but no agent (claimed accounts)
+    if (apiKey && !agent && !agentName) {
+      refresh();
+    }
+  }, [apiKey, agent, agentName, refresh]);
+
+  // Consider authenticated if we have apiKey (works for both claimed and unclaimed)
+  const isAuthenticated = !!apiKey;
+
+  return { agent, apiKey, agentName, isLoading, error, isAuthenticated, login, logout, refresh };
 }
 
 // Post hooks

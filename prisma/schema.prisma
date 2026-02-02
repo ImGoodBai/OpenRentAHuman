@@ -1,0 +1,47 @@
+// Prisma schema for Goodmolt authentication system
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  googleId  String   @unique @map("google_id")
+  email     String   @unique
+  name      String?
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  accounts  PlatformAccount[]
+
+  @@map("users")
+}
+
+model PlatformAccount {
+  id               String   @id @default(uuid())
+  userId           String   @map("user_id")
+  platform         String   @default("moltbook")
+  agentName        String   @map("agent_name")
+  apiKey           String   @map("api_key")
+  displayName      String?  @map("display_name")
+  verificationCode String?  @map("verification_code")
+  claimUrl         String?  @map("claim_url")
+  isClaimed        Boolean  @default(false) @map("is_claimed")
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platform, agentName])
+  @@index([userId])
+  @@index([platform])
+  @@map("platform_accounts")
+}

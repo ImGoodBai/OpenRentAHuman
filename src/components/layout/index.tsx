@@ -7,17 +7,21 @@ import { cn } from '@/lib/utils';
 import { useAuth, useIsMobile, useKeyboardShortcut } from '@/hooks';
 import { useUIStore, useNotificationStore } from '@/store';
 import { Button, Avatar, AvatarImage, AvatarFallback, Input, Skeleton } from '@/components/ui';
-import { Home, Search, Bell, Plus, Menu, X, Settings, LogOut, User, Flame, Clock, TrendingUp, Zap, ChevronDown, Moon, Sun, Hash, Users } from 'lucide-react';
+import { Home, Search, Bell, Plus, Menu, X, Settings, LogOut, User, Flame, Clock, TrendingUp, Zap, ChevronDown, Moon, Sun, Hash, Users, UserCog } from 'lucide-react';
 import { getInitials } from '@/lib/utils';
 
 // Header
 export function Header() {
-  const { agent, isAuthenticated, logout } = useAuth();
+  const { agent, agentName, isAuthenticated, logout } = useAuth();
   const { toggleMobileMenu, mobileMenuOpen, openSearch, openCreatePost } = useUIStore();
   const { unreadCount } = useNotificationStore();
   const isMobile = useIsMobile();
   const [showUserMenu, setShowUserMenu] = React.useState(false);
-  
+
+  // Display name: prefer agent data, fallback to agentName for unclaimed accounts
+  const displayName = agent?.displayName || agent?.name || agentName || 'User';
+  const userName = agent?.name || agentName || 'unknown';
+
   useKeyboardShortcut('k', openSearch, { ctrl: true });
   useKeyboardShortcut('n', openCreatePost, { ctrl: true });
   
@@ -78,19 +82,22 @@ export function Header() {
                 <button onClick={() => setShowUserMenu(!showUserMenu)} className="flex items-center gap-2 p-1 rounded-md hover:bg-muted transition-colors">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={agent?.avatarUrl} />
-                    <AvatarFallback>{agent?.name ? getInitials(agent.name) : '?'}</AvatarFallback>
+                    <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
                   </Avatar>
                   {!isMobile && <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                 </button>
-                
+
                 {showUserMenu && (
                   <div className="absolute right-0 top-full mt-2 w-56 rounded-md border bg-popover p-1 shadow-lg animate-in fade-in-0 zoom-in-95">
                     <div className="px-3 py-2 border-b mb-1">
-                      <p className="font-medium">{agent?.displayName || agent?.name}</p>
-                      <p className="text-xs text-muted-foreground">u/{agent?.name}</p>
+                      <p className="font-medium">{displayName}</p>
+                      <p className="text-xs text-muted-foreground">u/{userName}</p>
                     </div>
-                    <Link href={`/u/${agent?.name}`} className="flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-muted" onClick={() => setShowUserMenu(false)}>
+                    <Link href={`/u/${userName}`} className="flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-muted" onClick={() => setShowUserMenu(false)}>
                       <User className="h-4 w-4" /> Profile
+                    </Link>
+                    <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-muted" onClick={() => setShowUserMenu(false)}>
+                      <UserCog className="h-4 w-4" /> Account Management
                     </Link>
                     <Link href="/settings" className="flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-muted" onClick={() => setShowUserMenu(false)}>
                       <Settings className="h-4 w-4" /> Settings
