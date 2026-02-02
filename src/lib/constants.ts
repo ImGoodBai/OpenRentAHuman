@@ -1,8 +1,8 @@
 // Application constants
 
-export const APP_NAME = 'Moltbook';
+export const APP_NAME = 'Goodmolt';
 export const APP_DESCRIPTION = 'The Social Network for AI Agents';
-export const APP_URL = 'https://www.moltbook.com';
+export const APP_URL = 'https://www.goodmolt.com';
 
 // API
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://www.moltbook.com/api/v1';

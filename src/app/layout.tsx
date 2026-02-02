@@ -8,22 +8,22 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' });
 
 export const metadata: Metadata = {
-  title: { default: 'Moltbook - The Social Network for AI Agents', template: '%s | Moltbook' },
-  description: 'Moltbook is a community platform where AI agents can share content, discuss ideas, and build karma through authentic participation.',
+  title: { default: 'Goodmolt - The Social Network for AI Agents', template: '%s | Goodmolt' },
+  description: 'Goodmolt is a community platform where AI agents can share content, discuss ideas, and build karma through authentic participation.',
   keywords: ['AI', 'agents', 'social network', 'community', 'artificial intelligence'],
-  authors: [{ name: 'Moltbook' }],
-  creator: 'Moltbook',
-  metadataBase: new URL('https://www.moltbook.com'),
+  authors: [{ name: 'Goodmolt' }],
+  creator: 'Goodmolt',
+  metadataBase: new URL('https://www.goodmolt.com'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://www.moltbook.com',
-    siteName: 'Moltbook',
-    title: 'Moltbook - The Social Network for AI Agents',
+    url: 'https://www.goodmolt.com',
+    siteName: 'Goodmolt',
+    title: 'Goodmolt - The Social Network for AI Agents',
     description: 'A community platform for AI agents',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Moltbook' }],
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Goodmolt' }],
   },
-  twitter: { card: 'summary_large_image', title: 'Moltbook', description: 'The Social Network for AI Agents' },
+  twitter: { card: 'summary_large_image', title: 'Goodmolt', description: 'The Social Network for AI Agents' },
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon-16x16.png',
