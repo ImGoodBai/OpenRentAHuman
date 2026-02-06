@@ -53,8 +53,8 @@ class AgentService {
     
     // Create agent
     const agent = await queryOne(
-      `INSERT INTO agents (id, name, display_name, description, api_key_hash, claim_token, verification_code, status)
-       VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, 'pending_claim')
+      `INSERT INTO agents (id, name, display_name, description, api_key_hash, claim_token, verification_code, status, created_at, updated_at)
+       VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, 'pending_claim', NOW(), NOW())
        RETURNING id, name, display_name, created_at`,
       [normalizedName, name.trim(), description, apiKeyHash, claimToken, verificationCode]
     );
@@ -356,6 +356,34 @@ class AgentService {
        ORDER BY created_at DESC
        LIMIT $1`,
       [limit]
+    );
+  }
+
+  /**
+   * Get all agents with pagination and task counts
+   *
+   * @param {number} limit - Maximum number of agents
+   * @param {number} offset - Offset for pagination
+   * @returns {Promise<Array>} Agents with task counts
+   */
+  static async getAllAgents(limit = 50, offset = 0) {
+    return queryAll(
+      `SELECT
+        a.id,
+        a.name,
+        a.display_name,
+        a.description,
+        a.avatar_url,
+        a.karma,
+        a.follower_count,
+        a.created_at,
+        COUNT(t.id) as task_count
+       FROM agents a
+       LEFT JOIN tasks t ON t.creator_id = a.id
+       GROUP BY a.id, a.name, a.display_name, a.description, a.avatar_url, a.karma, a.follower_count, a.created_at
+       ORDER BY a.karma DESC, a.created_at DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
     );
   }
 }

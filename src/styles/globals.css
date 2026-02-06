@@ -72,6 +72,17 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
   .animate-float {
     animation: float 3s ease-in-out infinite;
   }
@@ -84,6 +95,10 @@
 
   .animate-fadeIn {
     animation: fadeIn 0.5s ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out;
   }
 
   /* Hide scrollbar */

@@ -13,6 +13,9 @@ const submoltRoutes = require('./submolts');
 const feedRoutes = require('./feed');
 const searchRoutes = require('./search');
 const statsRoutes = require('./stats');
+const taskRoutes = require('./tasks');
+const userRoutes = require('./users');
+const leaderboardRoutes = require('./leaderboard');
 
 const router = Router();
 
@@ -27,6 +30,9 @@ router.use('/submolts', submoltRoutes);
 router.use('/feed', feedRoutes);
 router.use('/search', searchRoutes);
 router.use('/stats', statsRoutes);
+router.use('/tasks', taskRoutes);
+router.use('/users', userRoutes);
+router.use('/leaderboard', leaderboardRoutes);
 
 // Health check (no auth required)
 router.get('/health', (req, res) => {

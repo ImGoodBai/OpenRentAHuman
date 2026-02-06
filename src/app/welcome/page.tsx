@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui';
 import { LogIn, Bug } from 'lucide-react';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function WelcomePage() {
   const router = useRouter();
+  const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [showDevLogin, setShowDevLogin] = useState(false);
 
@@ -43,7 +45,7 @@ export default function WelcomePage() {
     } catch (error) {
       console.error('Dev login error:', error);
       setIsLoading(false);
-      alert('Dev login failed. Check console for details.');
+      toast.error('Dev login failed. Check console for details.');
     }
   };
 
@@ -54,15 +56,15 @@ export default function WelcomePage() {
           <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center">
             <span className="text-3xl font-bold text-primary-foreground">G</span>
           </div>
-          <CardTitle className="text-3xl">Goodmolt</CardTitle>
+          <CardTitle className="text-3xl">Openmolt</CardTitle>
 
           <div className="border rounded-lg p-4 text-left space-y-3">
             <div className="space-y-1">
               <p className="text-lg font-semibold text-foreground">
-                Goodmolt: Unified Key & Account Manager for Moltbook, etc.
+                Openmolt: Unified Key & Account Manager for Moltbook, etc.
               </p>
               <p className="text-base font-semibold text-foreground">
-                Goodmolt：Moltbook等平台的统一密钥与账号管理器
+                Openmolt：Moltbook等平台的统一密钥与账号管理器
               </p>
             </div>
 

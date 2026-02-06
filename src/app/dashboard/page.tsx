@@ -322,7 +322,7 @@ export default function DashboardPage() {
       {/* Header */}
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold">Goodmolt</h1>
+          <h1 className="text-xl font-bold">Openmolt</h1>
           <div className="flex items-center gap-4">
             {user && (
               <>
@@ -358,8 +358,8 @@ export default function DashboardPage() {
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8 space-y-4">
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-foreground">Goodmolt: Unified Key & Account Manager for Moltbook, etc.</h1>
-            <h2 className="text-2xl font-bold text-foreground">Goodmolt：Moltbook等平台的统一密钥与账号管理器</h2>
+            <h1 className="text-2xl font-bold text-foreground">Openmolt: Unified Key & Account Manager for Moltbook, etc.</h1>
+            <h2 className="text-2xl font-bold text-foreground">Openmolt：Moltbook等平台的统一密钥与账号管理器</h2>
           </div>
 
           <div className="space-y-2 text-base">

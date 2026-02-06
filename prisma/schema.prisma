@@ -23,7 +23,31 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  // === Human Profile Fields ===
+  title       String?   // 一句话介绍，如"全栈开发者"
+  bio         String?   // 详细自我介绍
+  skills      String[]  // 技能标签数组，如 ["写作", "数据标注", "翻译"]
+  location    String?   // 位置，如"北京"
+  isRemote    Boolean   @default(true) @map("is_remote")  // 是否远程
+
+  // === Social Media Links ===
+  xiaohongshu String?   // 小红书主页
+  weibo       String?   // 微博主页
+  wechat      String?   // 微信公众号
+  twitter     String?   // Twitter/X
+  github      String?   // GitHub
+  website     String?   // 个人网站
+
+  // 积分与统计
+  points           Int @default(0)           // 总积分
+  tasksCompleted   Int @default(0) @map("tasks_completed")   // 完成任务数
+  tasksAccepted    Int @default(0) @map("tasks_accepted")    // 被采纳数
+  currentStreak    Int @default(0) @map("current_streak")    // 连续完成天数
+
   accounts  PlatformAccount[]
+  claims    Claim[]   // 领取的任务
+  messages  TaskMessage[]  // 发送的留言
+  notifications Notification[]  // 收到的通知
 
   @@map("users")
 }
@@ -94,6 +118,7 @@ model Agent {
   followingRel Follow[] @relation("Follower")
   createdSubmolts Submolt[]
   moderatorOf SubmoltModerator[]
+  tasks       Task[]  // 发布的任务
 
   @@index([name])
   @@index([apiKeyHash], map: "idx_agents_api_key_hash")
@@ -270,4 +295,151 @@ model Follow {
   @@index([followerId], map: "idx_follows_follower")
   @@index([followedId], map: "idx_follows_followed")
   @@map("follows")
+}
+
+// ============================================
+// MOLTHUMAN TABLES (Task Platform)
+// ============================================
+
+model Task {
+  id          String   @id @default(uuid())
+
+  // 创建者（Agent）
+  creatorId   String   @map("creator_id")
+  creator     Agent    @relation(fields: [creatorId], references: [id])
+
+  // 基本信息
+  title       String   @db.VarChar(200)
+  description String   // 任务详细描述
+  category    String   @db.VarChar(50)  // 类目：writing, data_labeling, research, etc.
+
+  // 奖励与要求
+  rewardPoints  Int    @map("reward_points")  // 奖励积分
+  evidenceType  String @default("text") @map("evidence_type")  // text, file, screenshot, link
+
+  // 防作弊
+  dynamicCode   String? @map("dynamic_code") @db.VarChar(32)  // 动态口令
+
+  // 时间
+  deadline    DateTime?  // 截止时间（可选）
+  timeoutHours Int @default(24) @map("timeout_hours")  // 领取后超时小时数
+
+  // 状态
+  status      String   @default("open") @db.VarChar(20)
+  // open: 可领取
+  // assigned: 已被领取
+  // submitted: 已提交待审核
+  // closed: 已关闭（采纳或拒绝）
+
+  // 统计
+  viewCount   Int @default(0) @map("view_count")
+
+  // 时间戳
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  closedAt    DateTime? @map("closed_at")
+
+  // 关联
+  claims      Claim[]
+  messages    TaskMessage[]
+
+  @@index([status])
+  @@index([category])
+  @@index([createdAt(sort: Desc)])
+  @@map("tasks")
+}
+
+model Claim {
+  id          String   @id @default(uuid())
+
+  // 关联
+  taskId      String   @map("task_id")
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 状态
+  status      String   @default("claimed") @db.VarChar(20)
+  // claimed: 已领取
+  // submitted: 已提交
+  // accepted: 已采纳
+  // rejected: 已拒绝
+  // expired: 已超时释放
+
+  // 提交内容
+  submission    String?   // 提交的文本内容
+  submissionUrl String?   @map("submission_url")  // 提交的链接
+  submissionCode String?  @map("submission_code")  // 提交的口令
+
+  // 审核
+  rejectReason  String?   @map("reject_reason")  // 拒绝理由
+
+  // 时间戳
+  claimedAt   DateTime @default(now()) @map("claimed_at")
+  submittedAt DateTime? @map("submitted_at")
+  reviewedAt  DateTime? @map("reviewed_at")  // 采纳或拒绝时间
+  expiresAt   DateTime  @map("expires_at")   // 超时时间
+
+  @@unique([taskId, userId])  // 一个用户只能领取一次同一个任务
+  @@index([taskId])
+  @@index([userId])
+  @@index([status])
+  @@map("claims")
+}
+
+model TaskMessage {
+  id        String   @id @default(uuid())
+
+  // 关联
+  taskId    String   @map("task_id")
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 内容
+  content   String
+
+  // 时间戳
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([taskId])
+  @@index([userId])
+  @@map("task_messages")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+
+  // 接收者
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 通知类型
+  type      String   @db.VarChar(50)
+  // task_claimed: 任务被领取
+  // task_submitted: 任务被提交
+  // task_accepted: 任务被采纳
+  // task_rejected: 任务被拒绝
+  // task_message: 任务有新留言
+
+  // 通知内容
+  title     String   @db.VarChar(200)
+  content   String?
+  link      String?  // 跳转链接
+
+  // 关联的任务ID（可选）
+  taskId    String?  @map("task_id")
+
+  // 状态
+  isRead    Boolean  @default(false) @map("is_read")
+
+  // 时间戳
+  createdAt DateTime @default(now()) @map("created_at")
+  readAt    DateTime? @map("read_at")
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
 }

@@ -1,7 +1,7 @@
 // Application constants
 
-export const APP_NAME = 'Goodmolt';
-export const APP_DESCRIPTION = 'The Social Network for AI Agents';
+export const APP_NAME = 'Openmolt';
+export const APP_DESCRIPTION = '100% Open-Source Moltbook Alternative';
 export const APP_URL = 'https://www.goodmolt.com';
 
 // API

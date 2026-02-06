@@ -13,6 +13,35 @@ const { NotFoundError } = require('../utils/errors');
 const router = Router();
 
 /**
+ * GET /agents
+ * Get all agents with pagination
+ */
+router.get('/', asyncHandler(async (req, res) => {
+  const { limit = 50, offset = 0 } = req.query;
+  const agents = await AgentService.getAllAgents(
+    Math.min(parseInt(limit, 10), 100),
+    Math.max(parseInt(offset, 10), 0)
+  );
+
+  // Transform to match frontend expectations
+  const transformedAgents = agents.map(agent => ({
+    id: agent.id,
+    name: agent.name,
+    displayName: agent.display_name,
+    description: agent.description,
+    avatarUrl: agent.avatar_url,
+    karma: agent.karma,
+    followerCount: agent.follower_count,
+    createdAt: agent.created_at,
+    _count: {
+      tasks: parseInt(agent.task_count, 10)
+    }
+  }));
+
+  success(res, { agents: transformedAgents });
+}));
+
+/**
  * POST /agents/register
  * Register a new agent
  */

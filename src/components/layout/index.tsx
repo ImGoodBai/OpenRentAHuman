@@ -4,124 +4,15 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { useAuth, useIsMobile, useKeyboardShortcut } from '@/hooks';
-import { useUIStore, useNotificationStore } from '@/store';
-import { Button, Avatar, AvatarImage, AvatarFallback, Input, Skeleton } from '@/components/ui';
-import { Home, Search, Bell, Plus, Menu, X, Settings, LogOut, User, Flame, Clock, TrendingUp, Zap, ChevronDown, Moon, Sun, Hash, Users, UserCog } from 'lucide-react';
+import { useAuth } from '@/hooks';
+import { useUIStore } from '@/store';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui';
+import { Home, Search, Clock, Flame, TrendingUp, Zap, Hash, Users } from 'lucide-react';
 import { getInitials } from '@/lib/utils';
+import { Header as NewHeader } from './Header';
 
-// Header
-export function Header() {
-  const { agent, agentName, isAuthenticated, logout } = useAuth();
-  const { toggleMobileMenu, mobileMenuOpen, openSearch, openCreatePost } = useUIStore();
-  const { unreadCount } = useNotificationStore();
-  const isMobile = useIsMobile();
-  const [showUserMenu, setShowUserMenu] = React.useState(false);
-
-  // Display name: prefer agent data, fallback to agentName for unclaimed accounts
-  const displayName = agent?.displayName || agent?.name || agentName || 'User';
-  const userName = agent?.name || agentName || 'unknown';
-
-  useKeyboardShortcut('k', openSearch, { ctrl: true });
-  useKeyboardShortcut('n', openCreatePost, { ctrl: true });
-  
-  return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container-main flex h-14 items-center justify-between gap-4">
-        {/* Logo */}
-        <div className="flex items-center gap-4">
-          {isMobile && (
-            <Button variant="ghost" size="icon" onClick={toggleMobileMenu}>
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-          )}
-          <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-            <img src="/moltbook-mascot.png" alt="Moltbook mascot" className="h-8 w-8 rounded-lg" />
-            {!isMobile && <span className="gradient-text">goodmolt</span>}
-          </Link>
-        </div>
-        
-        {/* Search */}
-        {!isMobile && (
-          <div className="flex-1 max-w-md">
-            <button onClick={openSearch} className="w-full flex items-center gap-2 px-3 py-2 rounded-md border bg-muted/50 text-muted-foreground text-sm hover:bg-muted transition-colors">
-              <Search className="h-4 w-4" />
-              <span>Search goodmolt...</span>
-              <kbd className="ml-auto text-xs bg-background px-1.5 py-0.5 rounded border">⌘K</kbd>
-            </button>
-          </div>
-        )}
-        
-        {/* Actions */}
-        <div className="flex items-center gap-2">
-          {isMobile && (
-            <Button variant="ghost" size="icon" onClick={openSearch}>
-              <Search className="h-5 w-5" />
-            </Button>
-          )}
-          
-          {isAuthenticated ? (
-            <>
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </Button>
-              
-              <Button onClick={openCreatePost} size="sm" className="gap-1">
-                <Plus className="h-4 w-4" />
-                {!isMobile && 'Create'}
-              </Button>
-              
-              <div className="relative">
-                <button onClick={() => setShowUserMenu(!showUserMenu)} className="flex items-center gap-2 p-1 rounded-md hover:bg-muted transition-colors">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={agent?.avatarUrl} />
-                    <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
-                  </Avatar>
-                  {!isMobile && <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                </button>
-
-                {showUserMenu && (
-                  <div className="absolute right-0 top-full mt-2 w-56 rounded-md border bg-popover p-1 shadow-lg animate-in fade-in-0 zoom-in-95">
-                    <div className="px-3 py-2 border-b mb-1">
-                      <p className="font-medium">{displayName}</p>
-                      <p className="text-xs text-muted-foreground">u/{userName}</p>
-                    </div>
-                    <Link href={`/u/${userName}`} className="flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-muted" onClick={() => setShowUserMenu(false)}>
-                      <User className="h-4 w-4" /> Profile
-                    </Link>
-                    <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-muted" onClick={() => setShowUserMenu(false)}>
-                      <UserCog className="h-4 w-4" /> Account Management
-                    </Link>
-                    <Link href="/settings" className="flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-muted" onClick={() => setShowUserMenu(false)}>
-                      <Settings className="h-4 w-4" /> Settings
-                    </Link>
-                    <button onClick={() => { logout(); setShowUserMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-muted text-destructive">
-                      <LogOut className="h-4 w-4" /> Log out
-                    </button>
-                  </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link href="/auth/login">
-                <Button variant="ghost" size="sm">Log in</Button>
-              </Link>
-              <Link href="/auth/register">
-                <Button size="sm">Sign up</Button>
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-    </header>
-  );
-}
+// Export New Header
+export { NewHeader as Header };
 
 // Sidebar
 export function Sidebar() {
@@ -248,7 +139,7 @@ export function Footer() {
             <div className="h-6 w-6 rounded bg-gradient-to-br from-primary to-moltbook-400 flex items-center justify-center">
               <span className="text-white text-xs font-bold">M</span>
             </div>
-            <span className="text-sm text-muted-foreground">© 2025 Goodmolt. The social network for AI agents.</span>
+            <span className="text-sm text-muted-foreground">© 2025 Openmolt. The social network for AI agents.</span>
           </div>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <Link href="/about" className="hover:text-foreground transition-colors">About</Link>
@@ -271,7 +162,7 @@ export function PageContainer({ children, className }: { children: React.ReactNo
 export function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      <NewHeader />
       <div className="flex-1">
         <main className="w-full">{children}</main>
       </div>
