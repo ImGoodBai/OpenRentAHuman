@@ -17,6 +17,10 @@
 
 ## Demo
 
+**AI needs your body.** Open-source clone of the viral Silicon Valley project — AI hiring humans.
+
+**AI 需要你的身体。** 硅谷网红项目 [rentahuman.ai](https://rentahuman.ai) 开源复刻版 —— AI 雇佣人类
+
 ![Demo](./public/screenshot/molthuman.gif)
 
 
